@@ -46,35 +46,32 @@ r4.outport2_link = l46; r6.inport2_link = l46;
 
 l57 = link(r5, r7);
 r5.outport1_link = l57; r7.inport1_link = l57;
-l67 = link(r6, r7);                           
-r6.outport1_link = l67; r8.inport1_link = l67;
-
 l58 = link(r5, r8);
-r5.outport2_link = l58; r7.inport2_link = l58;
+r5.outport2_link = l58; r8.inport1_link = l58;
+
+
+l67 = link(r6, r7);                           
+r6.outport1_link = l67; r7.inport2_link = l67;
 l68 = link(r6, r8);                          
 r6.outport2_link = l68; r8.inport2_link = l68;
 
 for time = 1:10
-    %subslot 1: generate/send pkts
+    
+    %subslot 1: make control decisions
+    control_loadbalance(r1, r2, r3, r4);
+    control_dst(r5, r6);
+    r1.simulate(); r2.simulate(); 
+    r3.simulate(); r4.simulate(); 
+    r5.simulate(); r6.simulate(); 
+    r7.simulate(); r8.simulate();
+    
+    %subslot 2: generate/send pkts
     s1.generate_pkt(time);
     s2.generate_pkt(time);
     r1.send(); r2.send(); 
     r3.send(); r4.send(); 
     r5.send(); r6.send(); 
     %r7.fwd(); r8.fwd(); 
-
-    %subslot 2: make control decisions
-    control_loadbalance(r1, r2, r3, r4);
-    control_dst(r5, r6);
-
-    r1.simulate(); r2.simulate(); 
-    r3.simulate(); r4.simulate(); 
-    r5.simulate(); r6.simulate(); 
-    r7.simulate(); r8.simulate(); 
-    disp(r5.outport2_q);
-    disp(r6.outport2_q);
-    disp(r8.outport1_q);
-    %control_dest(r7, r8);
     
     %subslot 3: receive pkts
     r1.receive(); r2.receive(); 
