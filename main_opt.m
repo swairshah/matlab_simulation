@@ -71,8 +71,9 @@ for time = 1:10
     r3.simulate(); r4.simulate(); 
     r5.simulate(); r6.simulate(); 
     r7.simulate(); r8.simulate(); 
-    disp(r5.outport1_q);
-    disp(r6.outport1_q);
+    disp(r5.outport2_q);
+    disp(r6.outport2_q);
+    disp(r8.outport1_q);
     %control_dest(r7, r8);
     
     %subslot 3: receive pkts
