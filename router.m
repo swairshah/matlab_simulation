@@ -1,20 +1,17 @@
 classdef router < handle
     properties
         id; % Router id
-        q; % Buffer queue
         max_q; % Maximum queue size
-        neighbors = {}; % List of next hop routers
         inport1_pkt = [];
         inport2_pkt = [];
-        inport1_control = 0; %send to outport1_q
-        inport2_control = 1; %send to outport2_q
+        inport1_control = 1; %send to outport1_q
+        inport2_control = 2; %send to outport2_q
         inport1_link = [];
         inport2_link = [];
         outport1_q;
         outport2_q;
         outport1_link;
         outport2_link;
-        node; % Next hop node set by the central controller
         delay; % Processing delay
         cum_drop = 0; % Cumulative packet drop count at this router
         cur_drop = 0; % Numnber of packets dropped at this router in this time stamp
@@ -26,30 +23,16 @@ classdef router < handle
             obj.max_q = max_q;
             obj.delay = delay;
         end
-        function obj = connect_router(obj, router)
-            obj.neighbors = [obj.neighbors, {router}];
-        end
-        function obj = connect_node(obj, node)
-            obj.node = node;
-        end
-        function ratio = occupancy(obj)
-            ratio = size(obj.q, 2) / obj.max_q;
-        end
-        function obj = enqueue(obj, pkt)
-            obj.q = [obj.q, pkt];
+
+        function ratio = ocp_ratio(obj)
+			ratio = obj.ocp_size() / obj.max_q;
+            ratio(1) = size(obj.outport1_q, 2) / obj.max_q;
+            ratio(2) = size(obj.outport2_q, 2) / obj.max_q;
         end
 
-        function obj = update_delays(obj)
-            for i = 1:length(obj.outport1_q)
-                obj.outport1_q(4,i) = obj.outport1_q(4,i) + 1;
-            end
-            for i = 1:length(obj.outport2_q)
-                obj.outport2_q(4,i) = obj.outport2_q(4,i) + 1;
-            end
-        end
-
-        function obj = reset_delay(obj, pkt)
-            pkt(4) = 0;
+        function ratio = ocp_size(obj)
+            ratio(1) = size(obj.outport1_q, 2);
+            ratio(2) = size(obj.outport2_q, 2);
         end
         
         function obj = increment_delays(obj)
@@ -78,12 +61,6 @@ classdef router < handle
             end
         end
 
-        function obj = fwd_to_dst(obj)
-            pkt = obj.outport1_q(:,1); 
-            obj.outport1_q(:,1) = [];
-            obj.outport1_link.receive(pkt);
-        end
-
         function obj = receive(obj)
             if ~isempty(obj.inport1_link) && ~isempty(obj.inport1_link.q)
                 obj.inport1_pkt = obj.inport1_link.q(:,1);
@@ -97,46 +74,50 @@ classdef router < handle
             end 
         end
 
-        function obj = simulate(obj)
+        function obj = control(obj)
+            obj.increment_delays();
+            obj.cur_drop = 0;
             if ~isempty(obj.inport1_pkt)
-                if obj.inport1_control == 0
+                if obj.inport1_control == 1
                     obj.outport1_q = [obj.outport1_q, obj.inport1_pkt];
                     obj.inport1_pkt = [];
-                else 
+                elseif obj.inport1_control == 2
                     obj.outport2_q = [obj.outport2_q, obj.inport1_pkt];
                     obj.inport1_pkt = [];
+                else
+                    obj.inport1_pkt = [];
+					obj.cur_drop = obj.cur_drop + 1; % drop because of unknown destinations
                 end
             end
             if ~isempty(obj.inport2_pkt)
-                if obj.inport2_control == 0
+                if obj.inport2_control == 1
                     obj.outport1_q = [obj.outport1_q, obj.inport2_pkt];
                     obj.inport2_pkt = [];
-                else 
+                elseif obj.inport1_control == 2
                     obj.outport2_q = [obj.outport2_q, obj.inport2_pkt];
                     obj.inport2_pkt = [];
+                else
+                    obj.inport1_pkt = [];
+					obj.cur_drop = obj.cur_drop + 1; % drop because of unknown destinations
                 end
             end
             obj.drop();
-            obj.increment_delays();
         end
+
 		function obj = drop(obj)
-			overflow = size(obj.outport1_q, 2) - obj.max_q;
+            overflow = size(obj.outport1_q, 2) - obj.max_q;
             if overflow > 0
-                obj.cur_drop = overflow;
+                obj.cur_drop = obj.cur_drop + overflow;
                 obj.cum_drop = obj.cum_drop + overflow;
                 obj.outport1_q(:, obj.max_q+1:end) = []; % remove overflow pkts from outport q
-            else
-                obj.cur_drop = 0;
-			end
+            end
 
             overflow = size(obj.outport2_q, 2) - obj.max_q;
             if overflow > 0
-                obj.cur_drop = overflow;
+                obj.cur_drop = obj.cur_drop + overflow;
                 obj.cum_drop = obj.cum_drop + overflow;
                 obj.outport2_q(:, obj.max_q+1:end) = []; % remove overflow pkts from outport q
-            else
-                obj.cur_drop = 0;
-			end
+            end
 		end
 
         function obj = clear(obj)

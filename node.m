@@ -8,6 +8,7 @@ classdef node < handle
         router; % Previous/next hop router
         packet; % Packet generatated/received at the current time stamp
         outport_link;
+        inport_link;
         cur_delay; % Delay of the current received packet
         cum_delay = 0; % Cumulative delay of the packets received
         pkt_count = 0; % Number of packets transmitted/received
@@ -41,21 +42,23 @@ classdef node < handle
             obj.outport_link.receive(pkt);
         end
         function obj = receive(obj, cur_time)
-            if ~isempty(obj.packet)
+            if ~isempty(obj.inport_link) && ~isempty(obj.inport_link.q)
+                obj.packet = obj.inport_link.q(:,1);
                 obj.cur_delay = cur_time - obj.packet(3);
                 obj.cum_delay = obj.cum_delay + obj.cur_delay;
                 obj.pkt_count = obj.pkt_count + 1;
                 obj.packet = [];
+                obj.inport_link.q(:,1) = [];
             else
                 obj.cur_delay = 0;
             end
         end
         function pkt = generate_pkt(obj, cur_time)
             if rand(node.rand_stream) <= obj.load
-                %dest = randi(node.rand_stream, length(obj.nodes));
-                dest = randi(node.rand_stream, 2);
-                pkt = [obj.id; dest; cur_time; 0];
+                dest = randi(node.rand_stream, length(obj.nodes));
+                pkt = [obj.id; obj.nodes{dest}.id; cur_time; 0];
                 obj.send(pkt);
+                obj.pkt_count = obj.pkt_count + 1;
             end
         end
         function obj = clear(obj)

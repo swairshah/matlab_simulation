@@ -16,11 +16,13 @@ classdef link < handle
         function obj = prev_router(obj, router)
             obj.prev = router;
         end
+
         function obj = next_router(obj, router)
             obj.next = router;
         end
+
         function obj = receive(obj, pkt)
-            obj.q = [obj.q, pkt];
+            obj.q = pkt;
         end
     end
 end
