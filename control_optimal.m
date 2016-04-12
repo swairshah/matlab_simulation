@@ -6,17 +6,17 @@ function [] = control_optimal(varargin)
         len_1 = length(router.outport1_q);
         len_2 = length(router.outport2_q);
         if len_1 < len_2
-            inport1_control = 0;
+            router.inport1_control = 0;
             len_1 = len_1 + 1;
         else
-            inport1_control = 1;
+            router.inport1_control = 1;
             len_2 = len_2 + 1;
         end
 
         if len_1 < len_2
-            inport2_control = 0;
+            router.inport2_control = 0;
         else
-            inport2_control = 1;
+            router.inport2_control = 1;
         end
     end
 end
