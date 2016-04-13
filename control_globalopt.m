@@ -12,7 +12,7 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
     % decision for r3.inport1_control
     if ~isempty(r3.inport1_pkt)
 
-    if r3.inport1_pkt r3.inport1_pkt(2) == 1 %dst is r7
+    if r3.inport1_pkt(2) == 1 %dst is r7
         if min([r3_top, r5_top]) > min([r3_bottom, r6_top])
             r3.inport1_control = 1; % prefer r6
             % this causes r3_bottom to increase
