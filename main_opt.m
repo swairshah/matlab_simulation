@@ -57,8 +57,9 @@ r6.outport2_link = l68; r8.inport2_link = l68;
 
 for time = 1:10
     
+    disp(r1.inport1_pkt);
     %subslot 1: make control decisions
-    control_loadbalance(r1, r2, r3, r4);
+    control_globalopt(r1, r2, r3, r4, r5, r6);
     control_dst(r5, r6);
     r1.simulate(); r2.simulate(); 
     r3.simulate(); r4.simulate(); 
