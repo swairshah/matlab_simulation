@@ -18,7 +18,7 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
             % this causes r3_bottom to increase
             r3_bottom = r3_bottom + 1;
         else
-            r3_inport1_control = 0; %prefer r5
+            r3.inport1_control = 0; %prefer r5
             r3_top = r3_top + 1;
         end
 
@@ -42,7 +42,7 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
             % this causes r3_bottom to increase
             r3_bottom = r3_bottom + 1;
         else
-            r3_inport2_control = 0; %prefer r5
+            r3.inport2_control = 0; %prefer r5
             r3_top = r3_top + 1;
         end
     else % dest is r8
