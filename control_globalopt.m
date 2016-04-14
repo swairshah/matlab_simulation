@@ -13,7 +13,7 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
     if ~isempty(r3.inport1_pkt)
 
     if r3.inport1_pkt(2) == 1 %dst is r7
-        if min([r3_top, r5_top]) > min([r3_bottom, r6_top])
+        if max([r3_top, r5_top]) > max([r3_bottom, r6_top])
             r3.inport1_control = 1; % prefer r6
             % this causes r3_bottom to increase
             r3_bottom = r3_bottom + 1;
@@ -23,7 +23,7 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
         end
 
     else % dest is r8
-        if min([r3_top, r5_bottom]) > min([r3_bottom, r6_bottom])
+        if max([r3_top, r5_bottom]) > max([r3_bottom, r6_bottom])
             r3.inport1_control = 1;
             r3_bottom = r3_bottom + 1;
         else 
@@ -37,7 +37,7 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
     %decision for r3.inport2_control
     if ~isempty(r3.inport2_pkt)
     if r3.inport2_pkt(2) == 1
-         if min([r3_top, r5_top]) > min([r3_bottom, r6_top])
+         if max([r3_top, r5_top]) > max([r3_bottom, r6_top])
             r3.inport2_control = 1; % prefer r6
             % this causes r3_bottom to increase
             r3_bottom = r3_bottom + 1;
@@ -46,7 +46,7 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
             r3_top = r3_top + 1;
         end
     else % dest is r8
-        if min([r3_top, r5_bottom]) > min([r3_bottom, r6_bottom])
+        if max([r3_top, r5_bottom]) > max([r3_bottom, r6_bottom])
             r3.inport2_control = 1;
             r3_bottom = r3_bottom + 1;
         else 
@@ -59,7 +59,7 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
     % decision for r4.inport1_control
     if ~isempty(r4.inport1_pkt)
     if r4.inport1_pkt(2) == 1
-        if min([r4_top, r5_top]) > min([r4_bottom, r6_top])
+        if max([r4_top, r5_top]) > max([r4_bottom, r6_top])
             r4.inport1_control = 1;
             r4_bottom = r4_bottom + 1;
         else
@@ -67,7 +67,7 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
             r4_top = r4_top + 1;
         end
     else %dest is r8
-        if min([r4_bottom, r6_bottom]) < min([r4_top, r5_bottom])
+        if max([r4_bottom, r6_bottom]) < max([r4_top, r5_bottom])
             r4.inport1_control = 1;
             r4_bottom = r4_bottom + 1;
         else
@@ -80,7 +80,7 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
     %decision for r4.inport2_control
     if ~isempty(r4.inport2_pkt)
     if r4.inport2_pkt(2) == 1
-        if min([r4_top, r5_top]) > min([r4_bottom, r6_top])
+        if max([r4_top, r5_top]) > max([r4_bottom, r6_top])
             r4.inport2_control = 1;
             r4_bottom = r4_bottom + 1;
         else
@@ -88,7 +88,7 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
             r4_top = r4_top + 1;
         end
     else %dest is t2/r8
-        if min([r4_bottom, r6_bottom]) < min([r4_top, r5_bottom])
+        if max([r4_bottom, r6_bottom]) < max([r4_top, r5_bottom])
             r4.inport2_control = 1;
             r4_bottom = r4_bottom + 1;
         else
@@ -115,9 +115,9 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
 
     if ~isempty(r1.inport1_pkt)
     if r1.inport1_pkt(2) == 1
-        t1_top_min = min(min([r1_top, r3_top, r5_top]), min([r1_top, r3_bottom, r6_top]));
-        t1_bottom_min = min(min([r1_bottom, r4_top, r5_top]), min([r1_bottom, r4_bottom, r6_top]));
-        if t1_bottom_min < t1_top_min
+        t1_top_max = max(max([r1_top, r3_top, r5_top]), max([r1_top, r3_bottom, r6_top]));
+        t1_bottom_max = max(max([r1_bottom, r4_top, r5_top]), max([r1_bottom, r4_bottom, r6_top]));
+        if t1_bottom_max < t1_top_max
             r1.inport1_control = 1;
             r1_bottom = r1_bottom + 1;
         else
@@ -125,9 +125,9 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
             r1_top = r1_top + 1;
         end
     else %dest is t2
-        t2_top_min = min(min([r1_top, r3_top, r5_bottom]), min([r1_top, r3_bottom, r6_bottom]));
-        t2_bottom_min = min(min([r1_bottom, r4_top, r5_bottom]), min([r1_bottom, r4_bottom, r6_bottom]));
-        if t2_bottom_min < t2_top_min
+        t2_top_max = max(max([r1_top, r3_top, r5_bottom]), max([r1_top, r3_bottom, r6_bottom]));
+        t2_bottom_max = max(max([r1_bottom, r4_top, r5_bottom]), max([r1_bottom, r4_bottom, r6_bottom]));
+        if t2_bottom_max < t2_top_max
             r1.inport1_control = 1;
             r1_bottom = r1_bottom + 1;
         else
@@ -139,9 +139,9 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
     
     if ~isempty(r1.inport2_pkt)
     if r1.inport2_pkt(2) == 1
-        t1_top_min = min(min([r1_top, r3_top, r5_top]), min([r1_top, r3_bottom, r6_top]));
-        t1_bottom_min = min(min([r1_bottom, r4_top, r5_top]), min([r1_bottom, r4_bottom, r6_top]));
-        if t1_bottom_min < t1_top_min
+        t1_top_max = max(max([r1_top, r3_top, r5_top]), max([r1_top, r3_bottom, r6_top]));
+        t1_bottom_max = max(max([r1_bottom, r4_top, r5_top]), max([r1_bottom, r4_bottom, r6_top]));
+        if t1_bottom_max < t1_top_max
             r1.inport2_control = 1;
             r1_bottom = r1_bottom + 1;
         else
@@ -149,9 +149,9 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
             r1_top = r1_top + 1;
         end
     else %dest is t2
-        t2_top_min = min(min([r1_top, r3_top, r5_bottom]), min([r1_top, r3_bottom, r6_bottom]));
-        t2_bottom_min = min(min([r1_bottom, r4_top, r5_bottom]), min([r1_bottom, r4_bottom, r6_bottom]));
-        if t2_bottom_min < t2_top_min
+        t2_top_max = max(max([r1_top, r3_top, r5_bottom]), max([r1_top, r3_bottom, r6_bottom]));
+        t2_bottom_max = max(max([r1_bottom, r4_top, r5_bottom]), max([r1_bottom, r4_bottom, r6_bottom]));
+        if t2_bottom_max < t2_top_max
             r1.inport2_control = 1;
             r1_bottom = r1_bottom + 1;
         else
@@ -165,9 +165,9 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
     
     if ~isempty(r2.inport1_pkt)
     if r2.inport1_pkt(2) == 1
-        t1_top_min = min(min([r2_top, r3_top, r5_top]), min([r2_top, r3_bottom, r6_top]));
-        t1_bottom_min = min(min([r2_bottom, r4_top, r5_top]), min([r2_bottom, r4_bottom, r6_top]));
-        if t1_bottom_min < t1_top_min
+        t1_top_max = max(max([r2_top, r3_top, r5_top]), max([r2_top, r3_bottom, r6_top]));
+        t1_bottom_max = max(max([r2_bottom, r4_top, r5_top]), max([r2_bottom, r4_bottom, r6_top]));
+        if t1_bottom_max < t1_top_max
             r2.inport1_control = 1;
             r2_bottom = r2_bottom + 1;
         else
@@ -175,9 +175,9 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
             r2_top = r2_top + 1;
         end
     else %dest is t2
-        t2_top_min = min(min([r2_top, r3_top, r5_bottom]), min([r2_top, r3_bottom, r6_bottom]));
-        t2_bottom_min = min(min([r2_bottom, r4_top, r5_bottom]), min([r2_bottom, r4_bottom, r6_bottom]));
-        if t2_bottom_min < t2_top_min
+        t2_top_max = max(max([r2_top, r3_top, r5_bottom]), max([r2_top, r3_bottom, r6_bottom]));
+        t2_bottom_max = max(max([r2_bottom, r4_top, r5_bottom]), max([r2_bottom, r4_bottom, r6_bottom]));
+        if t2_bottom_max < t2_top_max
             r2.inport1_control = 1;
             r2_bottom = r2_bottom + 1;
         else
@@ -189,9 +189,9 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
    
     if ~isempty(r2.inport2_pkt)
     if r2.inport2_pkt(2) == 1
-        t1_top_min = min(min([r2_top, r3_top, r5_top]), min([r2_top, r3_bottom, r6_top]));
-        t1_bottom_min = min(min([r2_bottom, r4_top, r5_top]), min([r2_bottom, r4_bottom, r6_top]));
-        if t1_bottom_min < t1_top_min
+        t1_top_max = max(max([r2_top, r3_top, r5_top]), max([r2_top, r3_bottom, r6_top]));
+        t1_bottom_max = max(max([r2_bottom, r4_top, r5_top]), max([r2_bottom, r4_bottom, r6_top]));
+        if t1_bottom_max < t1_top_max
             r2.inport2_control = 1;
             r2_bottom = r2_bottom + 1;
         else
@@ -199,9 +199,9 @@ function [] = control_globalopt(r1, r2, r3, r4, r5, r6)
             r2_top = r2_top + 1;
         end
     else %dest is t2
-        t2_top_min = min(min([r2_top, r3_top, r5_bottom]), min([r2_top, r3_bottom, r6_bottom]));
-        t2_bottom_min = min(min([r2_bottom, r4_top, r5_bottom]), min([r2_bottom, r4_bottom, r6_bottom]));
-        if t2_bottom_min < t2_top_min
+        t2_top_max = max(max([r2_top, r3_top, r5_bottom]), max([r2_top, r3_bottom, r6_bottom]));
+        t2_bottom_max = max(max([r2_bottom, r4_top, r5_bottom]), max([r2_bottom, r4_bottom, r6_bottom]));
+        if t2_bottom_max < t2_top_max
             r2.inport2_control = 1;
             r2_bottom = r2_bottom + 1;
         else
