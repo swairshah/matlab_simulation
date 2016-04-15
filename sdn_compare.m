@@ -9,8 +9,8 @@ end
 % Run the simulations
 q.learn = 0;
 nn.learn = 0;
-q.cum_reward = 0;
-nn.cum_reward = 0;
+q.clear();
+nn.clear();
 [drop_b, delay_b] = sdn_simulate(duration, batches, base, buffers, delays, seed);
 [drop_q, delay_q] = sdn_simulate(duration, batches, q, buffers, delays, seed);
 [drop_n, delay_n] = sdn_simulate(duration, batches, nn, buffers, delays, seed);

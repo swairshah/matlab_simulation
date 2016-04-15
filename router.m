@@ -4,8 +4,8 @@ classdef router < handle
         max_q; % Maximum queue size
         inport1_pkt = [];
         inport2_pkt = [];
-        inport1_control = 1; %send to outport1_q
-        inport2_control = 2; %send to outport2_q
+        inport1_control = 0; %send to outport1_q
+        inport2_control = 0; %send to outport2_q
         inport1_link = [];
         inport2_link = [];
         outport1_q;
@@ -87,18 +87,20 @@ classdef router < handle
                 else
                     obj.inport1_pkt = [];
 					obj.cur_drop = obj.cur_drop + 1; % drop because of unknown destinations
+                    obj.cum_drop = obj.cum_drop + 1;
                 end
             end
             if ~isempty(obj.inport2_pkt)
                 if obj.inport2_control == 1
                     obj.outport1_q = [obj.outport1_q, obj.inport2_pkt];
                     obj.inport2_pkt = [];
-                elseif obj.inport1_control == 2
+                elseif obj.inport2_control == 2
                     obj.outport2_q = [obj.outport2_q, obj.inport2_pkt];
                     obj.inport2_pkt = [];
                 else
-                    obj.inport1_pkt = [];
+                    obj.inport2_pkt = [];
 					obj.cur_drop = obj.cur_drop + 1; % drop because of unknown destinations
+                    obj.cum_drop = obj.cum_drop + 1;
                 end
             end
             obj.drop();

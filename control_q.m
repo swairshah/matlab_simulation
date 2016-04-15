@@ -7,7 +7,7 @@ classdef control_q < handle
         action_size;
         prev_state;
         prev_action;
-        cum_reward = 0;
+        cum_reward = [0, 0];
         alpha = 0.9; % Learning rate
         gamma = 0.8; % Discount factor
         epsilon = 1; % Epsilon value for greedy decisions
@@ -16,16 +16,16 @@ classdef control_q < handle
         r_stream; % Stream of random numbers
         learn = 1; % Flag for the state of the learner : 1-learning phase, 0-greedy phase
     end
-
-	methods (Static)
-		function dest = destination(pkt)
-			dest = 0;
-			if ~isempty(pkt)
-				dest = pkt(2);
-			end
-		end
-	end
-
+    
+    methods (Static)
+        function dest = destination(pkt)
+            dest = 0;
+            if ~isempty(pkt)
+                dest = pkt(2);
+            end
+        end
+    end
+    
     methods
         function obj = control_q(buffer_size, pkt_size, action_size, eps_step, seed)
             obj.state_size = [buffer_size, pkt_size] + 1;
@@ -36,44 +36,44 @@ classdef control_q < handle
             obj.epsilon_step = eps_step;
             obj.r_stream = RandStream('mt19937ar', 'Seed', seed);
         end
-
+        
         function obj = reward(obj, r, t)
             rew = reward(r, t) + .98 * obj.cum_reward(end);
             obj.cum_reward = [obj.cum_reward, rew];
         end
-
-		function cur_state = current_state(obj, r)
+        
+        function cur_state = current_state(obj, r)
             cur_state = ones(1, length(obj.state_size));
-			j = 1;
+            j = 1;
             for i = 1:4
-				% 2 output queues each for routers r1 through r4
+                % 2 output queues each for routers r1 through r4
                 cur_state(j:j+1) = r{i}.ocp_size();
-				j = j + 2;
+                j = j + 2;
             end
             for i = 5:6
-				% 1 output queue each for routers r5 & r6
+                % 1 output queue each for routers r5 & r6
                 cur_state(j) = size(r{i}.outport1_q, 2);
-				j = j + 1;
+                j = j + 1;
             end
             for i = 1:2
-				% 1 input link each for routers r1 & r2
+                % 1 input link each for routers r1 & r2
                 cur_state(j) = obj.destination(r{i}.inport1_pkt);
-				j = j + 1;
+                j = j + 1;
             end
             for i = 3:4
-				% 2 input links each for routers r3 & r4
+                % 2 input links each for routers r3 & r4
                 cur_state(j) = obj.destination(r{i}.inport1_pkt);
                 cur_state(j+1) = obj.destination(r{i}.inport2_pkt);
-				j = j + 2;
+                j = j + 2;
             end
-		end
-
+        end
+        
         function obj = control(obj, r)
-			% Current state of the routers
+            % Current state of the routers
             cur_state = obj.current_state(r);
             cur_index = num2cell(cur_state + 1);
             % Reward for the previous state & action
-            reward = obj.cum_reward(end);
+            reward = obj.cum_reward(end) - 0.98 * obj.cum_reward(end-1);
             
             % Compute the Q update using the previous reward
             if obj.learn == 1
@@ -105,11 +105,35 @@ classdef control_q < handle
             r{3}.inport2_control = c4;
             r{4}.inport1_control = c5;
             r{4}.inport2_control = c6;
-
+            for i = 5:6
+                obj.forward_dst(r{i});
+            end
+            
             % State current state as previous for next round
             obj.prev_state = cur_state;
             obj.prev_action = [c1, c2, c3, c4, c5, c6];
-			obj.epsilon = max(obj.min_epsilon, obj.epsilon - obj.epsilon_step);
+            obj.epsilon = max(obj.min_epsilon, obj.epsilon - obj.epsilon_step);
+        end
+        
+        function obj = forward_dst(obj, router)
+            % if pkt dst = 1, control = 1 (send to top outport queue)
+            % else if pkt dst = 2 control = 2 (send to bottom outport queue)
+            pkt = router.inport1_pkt;
+            if ~isempty(pkt) && pkt(2)==router.outport1_link.next.id
+                router.inport1_control =  1;
+            else
+                router.inport1_control =  0;
+            end
+            pkt = router.inport2_pkt;
+            if ~isempty(pkt) && pkt(2)==router.outport1_link.next.id
+                router.inport2_control =  1;
+            else
+                router.inport2_control =  0;
+            end
+        end
+        
+        function obj = clear(obj)
+            obj.cum_reward = [0, 0];
         end
     end
 end

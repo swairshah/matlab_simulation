@@ -24,12 +24,13 @@ end
 best_mean = -Inf;
 best_nn = [];
 figure('name', 'NN Candidates');
+state_size=[];
+for i = 1:4
+    state_size = [state_size, buffers(i), buffers(i)]; % 2 output queues for r1 through r4
+end
+state_size = [state_size, buffers(5), buffers(6)]; % 1 output queue for r5 & r6
 for n = 1:N
     % Create a new NN-controller
-    state_size=[];
-    for i=1:6
-        state_size=[state_size buffers(i) buffers(i)];
-    end
     nn = control_nn(hiddenLayerSize, state_size, pkt_size, action_size, epsilon_step, dec_seed, replay_size, sample_size);
     
     % Run the simulations

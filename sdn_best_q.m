@@ -20,6 +20,7 @@ load = loads;
 if size(loads, 2) == 1
     load = ones(1, batch) * loads;
 end
+
 best_mean = -Inf;
 best_q = [];
 figure('name', 'Q Candidates');
