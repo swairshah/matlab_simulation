@@ -39,25 +39,16 @@ classdef router < handle
             obj.q = [obj.q, pkt];
         end
 
-        function obj = update_delays(obj)
-            for i = 1:length(obj.outport1_q)
-                obj.outport1_q(4,i) = obj.outport1_q(4,i) + 1;
-            end
-            for i = 1:length(obj.outport2_q)
-                obj.outport2_q(4,i) = obj.outport2_q(4,i) + 1;
-            end
-        end
-
         function obj = reset_delay(obj, pkt)
             pkt(4) = 0;
         end
         
         function obj = increment_delays(obj)
             if ~isempty(obj.outport1_q)
-                obj.outport1_q(4,:) = obj.outport1_q(4,:) + 1;
+                obj.outport1_q(4,1) = obj.outport1_q(4,1) + 1;
             end
             if ~isempty(obj.outport2_q)
-                obj.outport2_q(4,:) = obj.outport2_q(4,:) + 1;
+                obj.outport2_q(4,1) = obj.outport2_q(4,1) + 1;
             end
         end
 
