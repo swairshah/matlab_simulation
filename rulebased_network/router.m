@@ -5,8 +5,8 @@ classdef router < handle
         neighbors = {}; % List of next hop routers
         inport1_pkt = [];
         inport2_pkt = [];
-        %inport1_control = 0; %send to outport1_q
-        %inport2_control = 1; %send to outport2_q
+        inport1_control = 0; %send to outport1_q
+        inport2_control = 1; %send to outport2_q
 
         % fwd_rules is a binary matrix
         % each entry is 0 or 1, 0 for fwd to top, 1 for bottom
@@ -123,6 +123,30 @@ classdef router < handle
             obj.drop();
             obj.increment_delays();
         end
+
+        function obj = simulate_pkt(obj)
+            if ~isempty(obj.inport1_pkt)
+                if obj.inport1_control == 0
+                    obj.outport1_q = [obj.outport1_q, obj.inport1_pkt];
+                    obj.inport1_pkt = [];
+                else 
+                    obj.outport2_q = [obj.outport2_q, obj.inport1_pkt];
+                    obj.inport1_pkt = [];
+                end
+            end
+            if ~isempty(obj.inport2_pkt)
+                if obj.inport2_control == 0
+                    obj.outport1_q = [obj.outport1_q, obj.inport2_pkt];
+                    obj.inport2_pkt = [];
+                else 
+                    obj.outport2_q = [obj.outport2_q, obj.inport2_pkt];
+                    obj.inport2_pkt = [];
+                end
+            end
+            obj.drop();
+            obj.increment_delays();
+        end
+
 		function obj = drop(obj)
 			overflow = size(obj.outport1_q, 2) - obj.max_q;
             if overflow > 0
